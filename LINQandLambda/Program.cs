@@ -130,11 +130,21 @@ namespace LINQandLambda
             // but a Func with a bool return and an object as parameter is basically a Predicate
             var r1 = products.Where(p => p.Category.Tier == 1 && p.Price < 900);
             Print("TIER 1 AND PRICE < 900", r1);
+            // SQL VERSION:
+            var r1SQL =
+                from p in products
+                where p.Category.Tier == 1 && p.Price < 900.00
+                select p;
 
 
             // SECOND EXAMPLE: Show the name of the products from the category Tools
             var r2 = products.Where(p => p.Category.Name == "Tools").Select(p => p.Name);
             Print("NAMES OF PRODUCTS FROM TOOLS", r2);
+            // SQL VERSION:
+            var r2SQL =
+                from p in products
+                where p.Category.Name == "Tools"
+                select p;
 
 
             // THIRD EXAMPLE: Show products whose names start with C
@@ -143,23 +153,47 @@ namespace LINQandLambda
             // CategoryName, you need to do it if there's ambiguity in the attribute's names
             var r3 = products.Where(p => p.Name[0] == 'C').Select(p => new { p.Name, p.Price, CategoryName = p.Category.Name });
             Print("PRODUCTS THAT START WITH C", r3);
-
+            // SQL VERSION:
+            var r3SQL =
+                from p in products
+                where p.Name[0] == 'C'
+                select new
+                {
+                    p.Name,
+                    p.Price,
+                    CategoryName = p.Category.Name
+                };
 
             // FOURTH EXAMPLE: Show products whose tier is 1 ordered by price
             // Note: ThenBy is basically a second OrderBy to break the tie of the first one
             var r4 = products.Where(p => p.Category.Tier == 1).OrderBy(p => p.Price).ThenBy(p => p.Name);
             Print("PRODUCTS WHOSE TIER IS 1 ORDERED BY PRICE", r4);
-
+            // SQL VERSION:
+            // Note: To use ThenBy method in this case, you can just put the second order by (ThenBy) first
+            var r4SQL =
+                from p in products
+                where p.Category.Tier == 1
+                orderby p.Name
+                orderby p.Price
+                select p;
 
             // FIFTH EXAMPLE: Use the previous collection to skip 2 products and then take 4
             var r5 = r4.Skip(2).Take(4);
             Print("PRODUCTS WHOSE TIER IS 1 ORDERED BY PRICE, SKIPING 2 AND TAKING 4", r5);
-
+            // SQL VERSION:
+            // Note: In this case, you just select the collection normally and then apply the method
+            var r5SQL = 
+                (from p in products
+                select p).Skip(2).Take(4);
 
             // SIXTH EXAMPLE: Pick the first product 
             // Note: This time, the var type is just Product, not IEnumerable<Product>
             var r6 = products.First();
             Console.WriteLine($"First product: {r6}");
+            // SQL VERSION:
+            var r6SQL =
+                (from p in products
+                 select p).First();
 
 
             // SEVENTH EXAMPLE: Trying to pick the first product of an empty collection
@@ -168,7 +202,11 @@ namespace LINQandLambda
             // Note: To avoid exceptions, you can use FirstOrDefault, wich returns null in this case
             var r7 = products.Where(p => p.Price > 3000).FirstOrDefault();
             Console.WriteLine($"First product: {r7}");
-
+            // SQL VERSION:
+            var r7SQL =
+                (from p in products
+                 where p.Price > 3000
+                 select p).FirstOrDefault();
 
             // EIGHTH EXAMPLE: Trying to pick a product based on it's ID
             // Note: The method SingleOrDefault (there's also just Single, but they differentiate just like First and FirstOrDefault)
@@ -177,7 +215,9 @@ namespace LINQandLambda
             var r8 = products.Where(p => p.Id == 3).SingleOrDefault();
             Console.WriteLine($"Single of Default - Test1: {r8}");
             // Using Single or SingleOrDefault with a query that returns more than an item will throw an exception
-
+            // SQL VERSION:
+            // FROM HERE TO THE END (EXCEPT THE LAST ONE), ALL SQL VERSIONS WILL BE THE SAME:
+            // SELECT THE PRODUCTS IN THE COLLECTION AND THEN APPLY THE METHOD
 
             // NINTH EXAMPLE: Get the biggest and lowest price
             // Note: If you don't put any parameters, the method Max will expect that the type of the collection
@@ -229,6 +269,10 @@ namespace LINQandLambda
                 }
                 Console.WriteLine();
             }
+            // SQL VERSION:
+            var r16SQL =
+                from p in products
+                group p by p.Category;
             
 
         }
